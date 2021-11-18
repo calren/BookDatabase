@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.GlobalScope
@@ -18,9 +19,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val viewModel: MainViewModel by viewModels {
-            MainViewModel.MainViewModelFactory((application as BookApplication).database.bookDao())
-        }
+        val bookDao = (application as BookApplication).database.bookDao()
 
         findViewById<Button>(R.id.button).setOnClickListener {
             val bookTitle = findViewById<EditText>(R.id.etBookTitle).text.toString()
@@ -28,11 +27,13 @@ class MainActivity : AppCompatActivity() {
 
             val newBook = Book(title = bookTitle, author = author)
 
-            viewModel.addBook(newBook)
+            lifecycleScope.launch {
+                bookDao.insert(newBook)
+            }
 
         }
 
-        viewModel.allBooks.observe(this) { books ->
+        bookDao.getBooks().asLiveData().observe(this) { books ->
             findViewById<Button>(R.id.btnGetBooks).text = "Number of books: " + books.size
         }
     }
