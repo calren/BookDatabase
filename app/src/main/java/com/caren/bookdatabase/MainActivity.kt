@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import com.caren.bookdatabase.database.Book
 import kotlinx.coroutines.launch
@@ -12,6 +15,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val viewModel: MainViewModel by viewModels {
+            MainViewModelFactory((application as BookApplication).database.bookDao())
+        }
 
         // Set an onclicklistener for the button
         // 1. Get the text from the title edittext
@@ -25,13 +32,28 @@ class MainActivity : AppCompatActivity() {
 
             val newBook = Book(title = title, author = author)
 
-
-            lifecycleScope.launch {
-                (application as BookApplication)
-                    .database.bookDao().addBook(newBook)
-            }
+            viewModel.addBook(newBook)
 
         }
+
+        // Add a button to delete the latest / most recent entry
+        findViewById<Button>(R.id.deleteBtn).setOnClickListener {
+            viewModel.deleteMostRecentBook()
+
+        }
+
+        viewModel.getAllBooks().observe(this) { books ->
+            // Update UI
+            findViewById<TextView>(R.id.tvNumberOfBooks).text =
+                "Number of books: " + books.size
+        }
+
+        // TODO: Build RecyclerView of Books
+        // TODO: How to add login
+        // 1. When the user opens, we need to check if they're logged in
+            // If not, show login screen
+            // If yes, we show them the home screen
+
     }
 
 
