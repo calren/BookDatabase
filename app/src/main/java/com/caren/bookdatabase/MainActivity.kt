@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.caren.bookdatabase.database.Book
 import kotlinx.coroutines.launch
 
@@ -42,17 +44,20 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        val rv = findViewById<RecyclerView>(R.id.rv)
+        val adapter = BooksAdapter(mutableListOf(), this)
+        rv.adapter = adapter
+        rv.layoutManager = LinearLayoutManager(this)
+
         viewModel.getAllBooks().observe(this) { books ->
-            // Update UI
-            findViewById<TextView>(R.id.tvNumberOfBooks).text =
-                "Number of books: " + books.size
+            adapter.books = books
+            adapter.notifyDataSetChanged()
         }
 
-        // TODO: Build RecyclerView of Books
         // TODO: How to add login
         // 1. When the user opens, we need to check if they're logged in
-            // If not, show login screen
-            // If yes, we show them the home screen
+        // If not, show login screen
+        // If yes, we show them the home screen
 
     }
 
